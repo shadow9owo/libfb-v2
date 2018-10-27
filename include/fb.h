@@ -13,9 +13,9 @@
 #define FULLSCREEN 1
 
 #define BLUE_SHIFT 0
-#define GREEN_SHIFT 1
-#define RED_SHIFT 2
-#define TRANS_SHIFT 3
+#define GREEN_SHIFT 8
+#define RED_SHIFT 16
+#define TRANS_SHIFT 24
 
 typedef struct _pixel
 {
@@ -27,6 +27,20 @@ typedef struct _pixel
 
 #define TYPE_CIRCLE 0
 #define TYPE_RECT 1
+#define TYPE_BITMAP 2
+
+
+#define RED 0x00FF0000
+#define GREEN 0x0000FF00
+#define BLUE 0x000000FF
+#define YELLOW 0x00FFFF00
+#define ORANGE 0x00FFA500
+#define WHITE 0x00FFFFFF
+#define BLACK 0x00000000
+#define CYAN 0x0000FFFF
+#define PINK 0x00FF00FF
+
+struct _sprite;
 
 typedef struct _circle
 {
@@ -34,6 +48,7 @@ typedef struct _circle
 	int radius;
 	//PIXEL colour;
 	int colour;
+	struct _sprite *parent;
 } CIRCLE;
 
 typedef struct _rect
@@ -42,15 +57,27 @@ typedef struct _rect
 	int width, height;
 	//PIXEL colour;
 	int colour;
+	struct _sprite *parent;
 } RECT;
+
+
+typedef struct _bitmap
+{
+	int x, y;
+	int width, height;
+	int *buffer;
+	struct _sprite *parent;
+} BITMAP;
 
 typedef struct _sprite
 {
+	char visible;
 	int type;
 	union
 	{
 		CIRCLE *circle;
 		RECT *rect;
+		BITMAP *b_map;
 	};
 } SPRITE;
 
@@ -77,5 +104,8 @@ static SPRITE *fb_add_sprite(FB *frame_buffer);
 
 CIRCLE *fb_init_circle(int x, int y, int radius, int colour, FB *frame_buffer);
 RECT *fb_init_rect(int x, int y, int width, int height, int colour, FB *frame_buffer);
+BITMAP *fb_init_bitmap(int x, int y, char *image /*.ppm format*/, FB *frame_buffer);
+
+void fb_render(FB *frame_buffer);
 
 #endif
