@@ -56,6 +56,11 @@ void fb_remove(FB *frame_buffer)
 	munmap(frame_buffer->buffer, frame_buffer->screensize);
 	close(frame_buffer->dev);
 	free(frame_buffer->back_buffer);
+	for (int i = 0; i < frame_buffer->sprite_count; ++i)
+	{
+		if (frame_buffer->sprite[i].type == TYPE_BITMAP)
+			free(frame_buffer->sprite[i].b_map->buffer);
+	}
 	free(frame_buffer->sprite);
 	free(frame_buffer);
 }
@@ -82,12 +87,80 @@ CIRCLE *fb_init_circle(int x, int y, int radius, int colour, FB *frame_buffer)
 	ret->colour.green = (colour >> GREEN_SHIFT) & 0xF;
 	ret->colour.red = (colour >> RED_SHIFT) & 0xF;
 	ret->colour.transparency = (colour >> TRANS_SHIFT) & 0xF;*/
+	sprite->visible = 1;
+	ret->parent = sprite;
 	return ret;
 }
 
 RECT *fb_init_rect(int x, int y, int width, int height, int colour, FB *frame_buffer)
 {
+	RECT *ret;
+	SPRITE *sprite = fb_add_sprite(frame_buffer);
+	sprite->type = TYPE_RECT;
+	ret = sprite->rect = (RECT*)malloc(sizeof(RECT));
+	ret->x = x;
+	ret->y = y;
+	ret->width = width;
+	ret->height = height;
+	ret->colour = colour;
+	sprite->visible = 1;
+	ret->parent = sprite;
+	return ret;
+}
+
+BITMAP *fb_init_bitmap(int x, int y, char *image /*.ppm format*/, FB *frame_buffer)
+{
+	BITMAP *ret;
+	SPRITE *sprite = fb_add_sprite(frame_buffer);
+	sprite->type = TYPE_BITMAP;
+	ret = sprite->b_map = (BITMAP*)malloc(sizeof(BITMAP));
+	ret->x = x;
+	ret->y = y;
+	char tmp[16];
+	FILE *fp;
+	fp = fopen(image, "rb");
+	if (!fp)
+		goto fail;
+	if (!fgets(tmp, 16, fp))
+		goto fail;
+	if (tmp[0] != 'P' || tmp[1] != '6')
+		goto fail;
+	int c = getc(fp);
+	while (c == '#')
+	{
+		while (getc(fp) != 10);
+		c = getc(fp);
+	}
+	ungetc(c, fp);
+
+	if (fscanf(fp, "%d %d", &ret->width, &ret->height) != 2)
+		goto fail;
+	int rgb_comp_colour;
+
+	if (fscanf(fp, "%d", &rgb_comp_colour) != 1)
+		goto fail;
+	if (rgb_comp_colour != 255)
+		goto fail;
+	while (fgetc(fp) != 10);
+
+	ret->buffer = (int*)malloc(ret->width * ret->height * 4);
+
+	for (int i = 0; i < ret->width * ret->height; ++i)
+	{
+		ret->buffer[i] = 0;
+		ret->buffer[i] |= (c=fgetc(fp)) << RED_SHIFT;
+		ret->buffer[i] |= (c=fgetc(fp)) << GREEN_SHIFT;
+		ret->buffer[i] |= c=fgetc(fp);
+	}
+
+	fclose(fp);
+	sprite->visible = 1;
+	ret->parent = sprite;
+	return ret;
 	
+fail:
+	free(ret);
+	return NULL;
 }
 
 void fb_render(FB *frame_buffer)
@@ -96,6 +169,8 @@ void fb_render(FB *frame_buffer)
 	memset(frame_buffer->back_buffer, 0, frame_buffer->screensize);
 	for (int i = 0; i < frame_buffer->sprite_count; ++i)
 	{
+		if (!frame_buffer->sprite[i].visible)
+			continue;
 		switch(frame_buffer->sprite[i].type)
 		{
 		case TYPE_CIRCLE:
@@ -134,6 +209,22 @@ void fb_render(FB *frame_buffer)
 					if (x + rect->x >= frame_buffer->width)
 						break;
 				        frame_buffer->back_buffer[(rect->y+y)*frame_buffer->finfo.line_length+rect->x+x+frame_buffer->vinfo.xoffset]=rect->colour;
+				}
+			}
+			break;
+		}
+		case TYPE_BITMAP:
+		{
+			BITMAP *bmap = frame_buffer->sprite[i].b_map;
+			for (int y = 0; y < bmap->height; ++y)
+			{
+				if (y + bmap->y >= frame_buffer->height)
+					break;
+				for (int x = 0; x < bmap->width; ++x)
+				{
+					if (x + bmap->x >= frame_buffer->width)
+						break;
+					frame_buffer->back_buffer[(bmap->y+y)*frame_buffer->finfo.line_length+bmap->x+x+frame_buffer->vinfo.xoffset]=bmap->buffer[y*bmap->width + x];
 				}
 			}
 			break;
