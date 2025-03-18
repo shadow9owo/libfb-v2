@@ -2,6 +2,11 @@
 
 //source https://stackoverflow.com/questions/16455024/how-can-i-get-screen-resolution-in-c-operating-system-qnx-or-linux
 
+#include <stdlib.h>
+#include <linux/fb.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
+
 #include <unistd.h>
 #include "types.h"
 #include "config.h"
