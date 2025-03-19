@@ -11,8 +11,6 @@
 extern int RenderCallbacks(FB *framebuffer);
 extern int HandleInput();
 
-bool Isrunning = true;
-
 int main(void)
 {
     FB *test;
