@@ -58,6 +58,8 @@ int RenderCallbacks(FB *framebuffer)
         return -1;
     }
 
+    rect->parent->visible = 1;
+
     while (Isrunning)
     {
         fb_render(framebuffer);
