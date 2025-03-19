@@ -32,6 +32,7 @@ int main(void)
 	fb_remove(test);
 	while (Isrunning)
 	{
+		 RenderCallbacks(test);
 		//infinite loop
 	}
 	return 0;
