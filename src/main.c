@@ -1,5 +1,5 @@
 #include <fb.h>
-#include <stdbool>
+#include <stdbool.h>
 
 //custom libs
 #include "utils.h"
