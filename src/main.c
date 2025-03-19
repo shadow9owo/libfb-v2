@@ -13,10 +13,10 @@ int main(void)
 {
 	if (RawCLI)
 	{
-		FB *test = fb_init(GetScreenSize().X,GetScreenSize().Y,0,0);  //fullscreen
+		FB test = fb_init(GetScreenSize().X,GetScreenSize().Y,0,0);  //fullscreen
 	}else 
 	{
-		FB *test = fb_init(0,0,0,0);
+		FB test = fb_init(0,0,0,0);
 	}
 	if (test)
 	{
@@ -50,7 +50,7 @@ int HandleInput()
 
 int RenderCallbacks(FB framebuffer)
 {
-	FB *test = framebuffer;
+	FB test = framebuffer;
 	RECT *rect = fb_init_rect(100, 100, 200, 150, WHITE, test);
 	while (1)
 	{
