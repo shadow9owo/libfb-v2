@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdbool>
+#include <stdbool.h>
 
 bool Debug = true;
 bool Isrunning = true;
