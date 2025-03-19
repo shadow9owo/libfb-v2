@@ -25,13 +25,12 @@ int main(void)
 
     if (!test)
     {
-        fprintf(stderr, "Failed to initialize framebuffer\n");
         exit(EXIT_FAILURE);
     }
 
     if (Debug)
     {
-        printf("Framebuffer initialized successfully\n");
+        printf("initialized successfully\n");
     }
 
     while (Isrunning)
@@ -52,11 +51,6 @@ int HandleInput()
 int RenderCallbacks(FB *framebuffer)
 {
     RECT *rect = fb_init_rect(100, 100, 200, 150, WHITE, framebuffer);
-    if (!rect)
-    {
-        fprintf(stderr, "Failed to create rectangle\n");
-        return -1;
-    }
 
     rect->parent->visible = 1;
 
