@@ -6,8 +6,8 @@
 #include "types.h"
 #include "config.h"
 
-extern int RenderCallbacks() {};
-extern int HandleInput() {};
+extern int RenderCallbacks();
+extern int HandleInput();
 
 int main(void)
 {
