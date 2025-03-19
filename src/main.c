@@ -11,12 +11,13 @@ extern int HandleInput();
 
 int main(void)
 {
+	FB test;
 	if (RawCLI)
 	{
-		FB test = fb_init(GetScreenSize().X,GetScreenSize().Y,0,0);  //fullscreen
+		test = fb_init(GetScreenSize().X,GetScreenSize().Y,0,0);  //fullscreen
 	}else 
 	{
-		FB test = fb_init(0,0,0,0);
+		test = fb_init(0,0,0,0);
 	}
 	if (test)
 	{
